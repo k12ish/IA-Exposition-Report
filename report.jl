@@ -15,6 +15,7 @@ md"""
 > *a very brief resumé of what you have done*
 
 This report details the time and frequency domain analysis of a low pass filter comprised of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
+Theory matched very well experiment.
 """
 
 # ╔═╡ 8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
@@ -88,15 +89,31 @@ $$v_{\text{out}}(t)= \left\{
 # ╔═╡ 851bdb4f-eedd-4080-806b-9a0528841e4b
 md"""
 #### Presentation of results
+
+Uncertainties are a decisive factor in our analysis.
+The resistor and capacitor have tolerances of 5% and 20% respectively, making the value of $$RC$$ differ by up to 25%.
+We need error propagation tools in order to determine whether experiment differs significantly from theory.
+
+In light of these issues, the analysis is conducted in the Julia programming language using the `Measurements.jl` module.
+The module manages uncertainties in a comprehensive manner and has functional correlation built in, so it understands that `sec²(x) - tan²(x) ≈ 1 ± 0`.
+
+Entering values for $$R$$ and $$C$$ into the program, we can see that the uncertainty of $$\frac{1}{RC}$$ given by the program agrees with the answer when calculated by hand:
 """
 
 # ╔═╡ f6f1ecaf-228d-4ac9-963c-229b14ea8242
 begin
-	R = (100e3 ± 5000) # Resistance
-	C = (1e-6 ± 2e-7) # Capacitance
-    V₀ = 5.102 ± 0.0002
-	R,C
+	R    = 100e3 ± 5000    # Resistance values from lab handout
+	C    = 1e-6  ± 2e-7    # Capacitance values from lab handout
+
+	(1/(R * C))u"s^-1"     # Display the value of 1/RC (with units)
 end
+
+# ╔═╡ 1d70a4fa-c5e2-44b1-9d13-1d788709c754
+md"""
+Using this software package, we can plot our analysis comparing theoretical quantities with measured ones.
+
+
+"""
 
 # ╔═╡ 7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
 md"""
@@ -111,41 +128,102 @@ md"""
 > 1. *it is often a good idea to number the conclusions.*
 """
 
-# ╔═╡ d243186f-9bb2-410f-bdbc-c2b62f5b7586
-function model_B(t)
-    if t < 0;
-        return 0
-	end
-    V₀ * (1 - ℯ^(-t/(R*C)))
-end
+# ╔═╡ b75150d2-43b9-4d16-a197-d72f5dc1317e
+md"""
+#### Data
+"""
 
-# ╔═╡ 0067e4bf-1b42-4494-8022-f14838816e14
+# ╔═╡ 6f395a82-a7c2-4238-82cc-f0d820a7dcbb
 begin
 	df = DataFrame(CSV.File("data/B_2.csv", skipto=3))
 	t = df[!, 1] .+ 0.018
     vₒᵤₜ = df[!, 2]
-	df
+	
+    # Data collected in Part C
+    vᵢₙ_rms  = [723.7, 703.4, 680.9, 687.7, 686.2, 682.8, 683.2, 682.9, 682.6, 682.7]
+    vₒᵤₜ_rms = [714.8, 689.8, 642.9, 573.1, 423.1, 205.8, 110.4, 57.3, 22.66, 13.46]
+    freq     = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100]
+    delay    = [175.6, 133.5, 106.1, 96.2, 75.2, 47.9, 27.7, 12.0, 5.117, 2.354]
+    gain     = -20log10.(vᵢₙ_rms ./ vₒᵤₜ_rms)
+    phase    = -0.36(delay .* freq)
+	
+	DataFrame(
+        vᵢₙ=vᵢₙ_rms * u"mV", vₒᵤₜ=vₒᵤₜ_rms * u"mV", 
+		Frequency=freq * u"Hz", Delay=delay * u"ms",
+		Gain=gain * u"dB", Phase=phase * u"°"
+	)
 end
 
 # ╔═╡ ac0f240a-9a4b-49f5-8912-0073e128ab83
 begin
+    function vₒᵤₜmodel_B(t)
+        if t < 0;
+            return 0
+        end
+        return Vₘₐₓ * (1 - ℯ^(-t/(R*C)))
+	end
+
+	Vₘₐₓ = 5.102 ± 0.0002  # Limiting Voltage values from picoscope
 	x = -0.1:0.01:1.0
-	y = model_B.(x)
+	y = vₒᵤₜmodel_B.(x)
     plot(x, 
         Measurements.value.(y), 
         ribbon=Measurements.uncertainty.(y),
         label="Theoretical Voltage",
+        ylabel="Voltage (V)",
         xlabel="Time (s)",
+        title="Fig. 1: Output voltage as a function of time",
         legend=:right,
         xlims=(-0.02, 0.65),
+        linewidth=3,
     )
 	plot!(t, vₒᵤₜ,
+        linewidth=3,
         label="Measured Voltage"
     )
-    plot!(t,
-        (vₒᵤₜ - Measurements.value.(model_B.(t))),
-        label="Difference"
+end
+
+# ╔═╡ 9fc1d884-baf9-4510-bc4e-a1178f232bcb
+begin
+    gain_model(f) = -10log10(1 + (2π * f * R * C)^2)
+    dummy_freq  = [10^y for y in range(log10(minimum(freq)), log10(maximum(freq)), length=200)]
+    theoretical_gain = gain_model.(dummy_freq)
+	plot(
+        dummy_freq,
+        Measurements.value.(theoretical_gain), 
+        ribbon=Measurements.uncertainty.(theoretical_gain),
+        linewidth=3,
+	    xaxis=:log,
+        label="Theoretical gain",
+        ylabel="Gain (dB)",
+        xlabel="Frequency (Hz)",
+        title="Fig. 2: Gain as a function of Frequency",
     )
+	scatter!(freq,
+	    gain,
+        label="Measured gain",
+	)
+end
+
+# ╔═╡ 1f9e12f3-f8be-49c4-87d1-fb3ec92769ac
+begin
+    phase_model(f) = -atan(2π * f * R * C) * 180 / π
+    theoretical_phase = phase_model.(dummy_freq)
+	plot(
+        dummy_freq,
+        Measurements.value.(theoretical_phase), 
+        ribbon=Measurements.uncertainty.(theoretical_phase),
+        linewidth=3,
+	    xaxis=:log,
+        label="Theoretical phase",
+        ylabel="Phase (°)",
+        xlabel="Frequency (Hz)",
+        title="Fig. 3: Phase as a function of Frequency",
+    )
+	scatter!(freq,
+	    phase,
+        label="Measured phase",
+	)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1842,10 +1920,13 @@ version = "0.9.1+5"
 # ╟─8068d016-34ee-4c43-80f5-f7110e65da62
 # ╟─851bdb4f-eedd-4080-806b-9a0528841e4b
 # ╠═f6f1ecaf-228d-4ac9-963c-229b14ea8242
-# ╟─7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
+# ╟─1d70a4fa-c5e2-44b1-9d13-1d788709c754
+# ╟─ac0f240a-9a4b-49f5-8912-0073e128ab83
+# ╟─9fc1d884-baf9-4510-bc4e-a1178f232bcb
+# ╟─1f9e12f3-f8be-49c4-87d1-fb3ec92769ac
+# ╠═7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
 # ╟─8f4aa2aa-e860-4857-8f32-7b79fabf82c1
-# ╠═d243186f-9bb2-410f-bdbc-c2b62f5b7586
-# ╠═ac0f240a-9a4b-49f5-8912-0073e128ab83
-# ╠═0067e4bf-1b42-4494-8022-f14838816e14
+# ╟─b75150d2-43b9-4d16-a197-d72f5dc1317e
+# ╟─6f395a82-a7c2-4238-82cc-f0d820a7dcbb
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
