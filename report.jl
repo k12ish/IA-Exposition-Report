@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ e30aad7a-1a47-49d9-9142-441290446140
-using Plots, Unitful, Measurements, PlutoUI, DifferentialEquations
+using Plots, Unitful, Measurements, PlutoUI, DifferentialEquations, CSV, DataFrames
 
 # ╔═╡ 15b4171f-9a0c-4fd9-94ca-9e28fcffe818
 md"""
@@ -15,7 +15,10 @@ md"""
 > *a very brief resumé of what you have done*
 
 This report details the time and frequency domain analysis of a low pass filter comprised of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
+"""
 
+# ╔═╡ 8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
+md"""
 #### Introduction and Objectives
 
 > *background to the work to be described and justify why the investigation is worth carrying out; can be based the aims of the experiment provided earlier*
@@ -23,38 +26,82 @@ This report details the time and frequency domain analysis of a low pass filter 
 Low pass filters act to block the high frequency _component_ of an arbitary signal.
 This property makes them very useful in acoustics and electronics, where they have applications ranging from subwoofer electronics to telecommunications equipment.
 
+This report has the following aims and objectives:
+
 - To compare the measurements obtained from the picoscope readings with expected theoretical calculations of the nominal value of the RC time constant of the components.
-- To understand the impact of the resistor tolerance (5%) and the capacity tolerance (20%) on the value of the RC time constant and the expected performance of the components.
-- To determine whether a value of the RC time constant, considering the tolerances, is similar to the experimental values measured in the time and frequency domain.
+- To understand the impact of the resistor tolerance (5%) and the capacitator tolerance (20%) on the value of the RC time constant and the expected performance of the components.
 - To investigate the attenuation vs frequency behaviour of a low pass filter in terms of dB/decade.
-- To observe the phase response of a potential divider circuit across different frequencies.
+"""
 
-
+# ╔═╡ 8c328a54-ca37-4db7-852c-4b496b7b3cd9
+md"""
 #### Experimental Method
 
 > *present a very brief overview of the experiment in the report and refer the relevant handouts*
 
+Two experiments were completed for this report, following the guidance in the lab handouts provided.
+Both experiments involved the analysis of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
+The circuit diagram below labels the input voltage, $v_{\text{in}}(t)$ and the output voltage, $v_{\text{out}}(t)$ as functions of time.
+
+$( Show(MIME"image/png"(), read("CircuitDiagram.png")) )
+
+IEP Exercise B involved the time domain analysis of the circuit.
+This experiment measured the charging response of the capacitator, with $$v_{\text{in}}(t)$$ equal to 
+
+$$v_{\text{in}}(t)= \left\{ 
+    \begin{array}{cc} 
+        0 & t<0 \\ 
+        V_{USB} & t \geq 0 
+    \end{array}
+\right.$$
+
+IEP Exercise C involved the frequency domain analysis of the circuit.
+In this experiment the frequency of the input voltage was varied and the output voltage was measured.
+
+"""
+
+# ╔═╡ 8068d016-34ee-4c43-80f5-f7110e65da62
+md"""
 #### Theory
 
 > *a brief account of the Theory used*
 
-$v_{\text{out}}(t)=
-\left\{
-    \begin{array}{cc}
+First, we consider the time domain analysis.
+The experiment begins with the voltage across all components set to zero, so $$v_{\text{in}} = v_{\text{out}} = 0$$ for $$t \lt 0$$.
+At $$t=0$$, $$v_{\text{in}}(t)$$ is now equal to $$V_{USB}$$.
+Applying Ohm's Law and the definition of capacitance, we can derive a differential equation for $$v_{\text{out}}(t)$$
+
+$$I=\frac{V_{USB}-v_{\text{out}}(t)}{R}=C \frac{d\left[ v_{\text{out}}(t) \right]}{d t}$$
+
+This can be readily solved to give a full equation for $$v_{\text{out}}(t)$$
+
+$$v_{\text{out}}(t)= \left\{ 
+    \begin{array}{cc} 
         0 & t<0 \\ 
-        V_{USB} \left[
-            1-\exp \left(-\frac{t}{\tau_{R C}}\right)
-        \right] & t \geq 0
+        V_{USB} \left[1-\exp \left(\frac{-t}{\tau_{R C}}\right) \right] & t \geq 0 
     \end{array}
-\right.$
+\right.$$
 
-#### Presentation of results
-
-
-#### Discussion
 
 """
-# $(Show(MIME"image/png"(), read("CircuitDiagram.png")))
+
+# ╔═╡ 851bdb4f-eedd-4080-806b-9a0528841e4b
+md"""
+#### Presentation of results
+"""
+
+# ╔═╡ f6f1ecaf-228d-4ac9-963c-229b14ea8242
+begin
+	R = (100e3 ± 5000) # Resistance
+	C = (1e-6 ± 2e-7) # Capacitance
+    V₀ = 5.102 ± 0.0002
+	R,C
+end
+
+# ╔═╡ 7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
+md"""
+#### Discussion
+"""
 
 # ╔═╡ 8f4aa2aa-e860-4857-8f32-7b79fabf82c1
 md"""
@@ -64,21 +111,48 @@ md"""
 > 1. *it is often a good idea to number the conclusions.*
 """
 
-# ╔═╡ ac0f240a-9a4b-49f5-8912-0073e128ab83
-begin
-	x = 1:0.3:5.0
-	f(x) = ℯ^ (x / 1 ± 0.1)
-	y = f.(x)
-    plot(x, y)
+# ╔═╡ d243186f-9bb2-410f-bdbc-c2b62f5b7586
+function model_B(t)
+    if t < 0;
+        return 0
+	end
+    V₀ * (1 - ℯ^(-t/(R*C)))
 end
 
+# ╔═╡ 0067e4bf-1b42-4494-8022-f14838816e14
+begin
+	df = DataFrame(CSV.File("data/B_2.csv", skipto=3))
+	t = df[!, 1] .+ 0.018
+    vₒᵤₜ = df[!, 2]
+	df
+end
 
-# ╔═╡ 93778bfe-fb13-4297-86c2-0c47f372ed75
-
+# ╔═╡ ac0f240a-9a4b-49f5-8912-0073e128ab83
+begin
+	x = -0.1:0.01:1.0
+	y = model_B.(x)
+    plot(x, 
+        Measurements.value.(y), 
+        ribbon=Measurements.uncertainty.(y),
+        label="Theoretical Voltage",
+        xlabel="Time (s)",
+        legend=:right,
+        xlims=(-0.02, 0.65),
+    )
+	plot!(t, vₒᵤₜ,
+        label="Measured Voltage"
+    )
+    plot!(t,
+        (vₒᵤₜ - Measurements.value.(model_B.(t))),
+        label="Difference"
+    )
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -86,6 +160,8 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
+CSV = "~0.9.10"
+DataFrames = "~1.2.2"
 DifferentialEquations = "~6.19.0"
 Measurements = "~2.6.0"
 Plots = "~1.23.5"
@@ -187,6 +263,12 @@ git-tree-sha1 = "f9a6389348207faf5e5c62cbc7e89d19688d338a"
 uuid = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
 version = "3.3.0"
 
+[[CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings"]
+git-tree-sha1 = "74147e877531d7c172f70b492995bc2b5ca3a843"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.9.10"
+
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "f2202b55d816427cd385a9a4f3ffb226bee80f99"
@@ -216,6 +298,12 @@ deps = ["ArrayInterface", "Static"]
 git-tree-sha1 = "7b8f09d58294dc8aa13d91a8544b37c8a1dcbc06"
 uuid = "fb6a15b2-703c-40df-9091-08a04967cfa9"
 version = "0.1.4"
+
+[[CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.0"
 
 [[ColorSchemes]]
 deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random"]
@@ -299,6 +387,12 @@ version = "0.2.0"
 git-tree-sha1 = "cc70b17275652eb47bc9e5f81635981f13cea5c8"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.9.0"
+
+[[DataFrames]]
+deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Reexport", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "d785f42445b63fc86caa08bb9a9351008be9b765"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.2.2"
 
 [[DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -481,6 +575,12 @@ git-tree-sha1 = "acebe244d53ee1b461970f8910c235b259e772ef"
 uuid = "9aa1b823-49e4-5ca5-8b0f-3971ec8bab6a"
 version = "0.3.2"
 
+[[FilePathsBase]]
+deps = ["Dates", "Mmap", "Printf", "Test", "UUIDs"]
+git-tree-sha1 = "5440c1d26aa29ca9ea848559216e5ee5f16a8627"
+uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
+version = "0.9.14"
+
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
 git-tree-sha1 = "8756f9935b7ccc9064c6eef0bff0ad643df733a3"
@@ -654,6 +754,12 @@ git-tree-sha1 = "098e4d2c533924c921f9f9847274f2ad89e018b8"
 uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"
 version = "0.5.0"
 
+[[InlineStrings]]
+deps = ["Parsers"]
+git-tree-sha1 = "19cb49649f8c41de7fea32d089d37de917b553da"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.0.1"
+
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -669,6 +775,11 @@ deps = ["Test"]
 git-tree-sha1 = "a7254c0acd8e62f1ac75ad24d5db43f5f19f3c65"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.2"
+
+[[InvertedIndices]]
+git-tree-sha1 = "bee5f1ef5bf65df56bdd2e40447590b272a5471f"
+uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+version = "1.1.0"
 
 [[IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -1088,6 +1199,12 @@ git-tree-sha1 = "a3ff99bf561183ee20386aec98ab8f4a12dc724a"
 uuid = "1d0040c9-8b98-4ee7-8388-3f51789ca0ad"
 version = "0.1.2"
 
+[[PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "a193d6ad9c45ada72c14b731a318bedd3c2f00cf"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.3.0"
+
 [[PositiveFactorizations]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "17275485f373e6673f7e7f97051f703ed5b15b20"
@@ -1105,6 +1222,12 @@ deps = ["TOML"]
 git-tree-sha1 = "00cfd92944ca9c760982747e9a1d0d5d86ab1e5a"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.2.2"
+
+[[PrettyTables]]
+deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
+git-tree-sha1 = "d940010be611ee9d67064fe559edbb305f8cc0eb"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "1.2.3"
 
 [[Printf]]
 deps = ["Unicode"]
@@ -1237,6 +1360,12 @@ deps = ["Dates"]
 git-tree-sha1 = "0b4b7f1393cff97c33891da2a0bf69c6ed241fda"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.1.0"
+
+[[SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "f45b34656397a1f6e729901dc9ef679610bd12b5"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.3.8"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1423,6 +1552,12 @@ git-tree-sha1 = "0952c9cee34988092d73a5708780b3917166a0dd"
 uuid = "0796e94c-ce3b-5d07-9a54-7f471281c624"
 version = "0.5.21"
 
+[[TranscodingStreams]]
+deps = ["Random", "Test"]
+git-tree-sha1 = "216b95ea110b5972db65aa90f88d8d89dcb8851c"
+uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
+version = "0.9.6"
+
 [[TreeViews]]
 deps = ["Test"]
 git-tree-sha1 = "8d0d7a3fe2f30d6a7f833a5f19f7c7a5b396eae6"
@@ -1487,6 +1622,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Wayland_jll"]
 git-tree-sha1 = "2839f1c1296940218e35df0bbb220f2a79686670"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
 version = "1.18.0+4"
+
+[[WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "c69f9da3ff2f4f02e811c3323c22e5dfcb584cfa"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.1"
 
 [[XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
@@ -1696,8 +1837,15 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═e30aad7a-1a47-49d9-9142-441290446140
 # ╟─15b4171f-9a0c-4fd9-94ca-9e28fcffe818
+# ╟─8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
+# ╟─8c328a54-ca37-4db7-852c-4b496b7b3cd9
+# ╟─8068d016-34ee-4c43-80f5-f7110e65da62
+# ╟─851bdb4f-eedd-4080-806b-9a0528841e4b
+# ╠═f6f1ecaf-228d-4ac9-963c-229b14ea8242
+# ╟─7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
 # ╟─8f4aa2aa-e860-4857-8f32-7b79fabf82c1
+# ╠═d243186f-9bb2-410f-bdbc-c2b62f5b7586
 # ╠═ac0f240a-9a4b-49f5-8912-0073e128ab83
-# ╠═93778bfe-fb13-4297-86c2-0c47f372ed75
+# ╠═0067e4bf-1b42-4494-8022-f14838816e14
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
