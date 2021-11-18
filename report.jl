@@ -12,8 +12,6 @@ md"""
 ## Time and frequency domain analysis of an electronic low pass filter
 **Krish Shah, Girton College, Lab Group 37**
 
-> *a very brief resumé of what you have done*
-
 This report details the time and frequency domain analysis of a low pass filter comprised of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
 Theory matched very well experiment.
 """
@@ -21,8 +19,6 @@ Theory matched very well experiment.
 # ╔═╡ 8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
 md"""
 #### Introduction and Objectives
-
-> *background to the work to be described and justify why the investigation is worth carrying out; can be based the aims of the experiment provided earlier*
 
 Low pass filters act to block the high frequency _component_ of an arbitary signal.
 This property makes them very useful in acoustics and electronics, where they have applications ranging from subwoofer electronics to telecommunications equipment.
@@ -38,13 +34,13 @@ This report has the following aims and objectives:
 md"""
 #### Experimental Method
 
-> *present a very brief overview of the experiment in the report and refer the relevant handouts*
-
 Two experiments were completed for this report, following the guidance in the lab handouts provided.
 Both experiments involved the analysis of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
 The circuit diagram below labels the input voltage, $v_{\text{in}}(t)$ and the output voltage, $v_{\text{out}}(t)$ as functions of time.
 
 $( Show(MIME"image/png"(), read("CircuitDiagram.png")) )
+
+> **Figure 1:** The circuit diagram used throughout this experiment
 
 IEP Exercise B involved the time domain analysis of the circuit.
 This experiment measured the charging response of the capacitator, with $$v_{\text{in}}(t)$$ equal to 
@@ -52,7 +48,7 @@ This experiment measured the charging response of the capacitator, with $$v_{\te
 $$v_{\text{in}}(t)= \left\{ 
     \begin{array}{cc} 
         0 & t<0 \\ 
-        V_{USB} & t \geq 0 
+        V_{max} & t \geq 0 
     \end{array}
 \right.$$
 
@@ -65,24 +61,47 @@ In this experiment the frequency of the input voltage was varied and the output 
 md"""
 #### Theory
 
-> *a brief account of the Theory used*
 
 First, we consider the time domain analysis.
 The experiment begins with the voltage across all components set to zero, so $$v_{\text{in}} = v_{\text{out}} = 0$$ for $$t \lt 0$$.
-At $$t=0$$, $$v_{\text{in}}(t)$$ is now equal to $$V_{USB}$$.
-Applying Ohm's Law and the definition of capacitance, we can derive a differential equation for $$v_{\text{out}}(t)$$
 
-$$I=\frac{V_{USB}-v_{\text{out}}(t)}{R}=C \frac{d\left[ v_{\text{out}}(t) \right]}{d t}$$
+At $$t\ge 0$$, $$v_{\text{in}}(t)$$ is equal to $$V_{max}$$.
+Applying Ohm's Law and the definition of capacitance, we can derive a differential equation for $$v_{\text{out}}(t)$$ for when $$t\ge 0$$.
 
-This can be readily solved to give a full equation for $$v_{\text{out}}(t)$$
+$$I=\frac{V_{max}-v_{\text{out}}(t)}{R}=C \frac{d\left[ v_{\text{out}}(t) \right]}{d t}$$
+
+This can be readily solved to give an equation for $$v_{\text{out}}(t)$$.
+Putting everything together, we have:
 
 $$v_{\text{out}}(t)= \left\{ 
     \begin{array}{cc} 
         0 & t<0 \\ 
-        V_{USB} \left[1-\exp \left(\frac{-t}{\tau_{R C}}\right) \right] & t \geq 0 
+        V_{max} \left[1-\exp \left(\frac{-t}{R C}\right) \right] & t \geq 0 
     \end{array}
 \right.$$
 
+In practice, our charging response data is not perfectly zeroed.
+To counteract this, we shift the input times by a fixed amount, $$t_d$$, such that the data is closer the theoretical line of best fit.
+
+
+For the second experiment, we begin by using Kirchoffs laws to get an expression for the ratio of $$v_{in}$$ and $$v_{out}$$.
+
+$$\frac{v_{\text {out }}}{v_{\text {in }}}
+= \frac{\frac 1 R }{\frac 1 R +j \omega C}
+= \frac{1}{\sqrt{1+(\omega R C)^{2}}} \exp \left[-j \tan ^{-1}(\omega R C) \right]$$
+
+
+From this equation we can inferr that the phase shift between $$v_{in}$$ and $$v_{out}$$ is $$\phi = -\tan ^{-1}(\omega R C)$$.
+
+Next, we find the theoretical attenuation in decibels.
+
+$$20 \log _{10}\left(\frac{V_{o}}{V_{i}}\right)
+= 20 \log _{10}\left[\frac{1}{\sqrt{1+(\omega R C)^{2}}}\right]
+= -10 \log _{10}\left[1+(\omega R C)^{2}\right]$$
+
+At very low frequencies, this equation is approximated by a straight line of zero slope.
+For large frequencies, $$\log \left(1+(\omega R C)^{2}\right)
+\approx 2 \log \left(\omega R C\right)$$, so the attenuation is approximated by a straight line of −20 dB per decade slope.
 
 """
 
@@ -102,7 +121,7 @@ Entering values for $$R$$ and $$C$$ into the program, we can see that the uncert
 
 # ╔═╡ f6f1ecaf-228d-4ac9-963c-229b14ea8242
 begin
-	R    = 100e3 ± 5000    # Resistance values from lab handout
+	R    = 100e3 ± 1000    # Resistance values from lab handout
 	C    = 1e-6  ± 2e-7    # Capacitance values from lab handout
 
 	(1/(R * C))u"s^-1"     # Display the value of 1/RC (with units)
@@ -111,13 +130,42 @@ end
 # ╔═╡ 1d70a4fa-c5e2-44b1-9d13-1d788709c754
 md"""
 Using this software package, we can plot our analysis comparing theoretical quantities with measured ones.
+In each case the values of $$R$$ and $$C$$ used are the same as above.
+We represent the area of uncertainty on each graph below with a blue shaded region.
+"""
 
+# ╔═╡ 9c561430-28e0-408e-9665-0c904c2ba893
+md"""
+> **Figure 2:** A graph showing the output voltage as a function of time. The value of ``V_{max}`` used to create the theoretical voltage curve was 5.102 ± 0.0002 V, obtained from the picoscope measuring software. The measurement data was shifted by 0.018s in the x-axis to zero the picoscope readings.
+
+----
+"""
+
+# ╔═╡ 1f759aa4-7e8f-4746-a2f5-20141db658bd
+md"""
+> **Figure 3:** A Bode plot showing gain as a function of frequency.
+
+----
+"""
+
+# ╔═╡ d4b2c2db-5267-4de7-9d0a-3f11872aacd8
+md"""
+> **Figure 4:** A Bode plot showing phase as a function of frequency.
 
 """
 
 # ╔═╡ 7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
 md"""
 #### Discussion
+
+Time domain analysis agrees almost perfectly with theoretical data.
+- In figure 2, all points are within the shaded blue region, which shows that the measurement is consistent with the resistance and capacitance within the tolerances given.
+
+Frequency domain analysis agrees strongly with theoretical data, but hints strongly towards human error.
+- In figure 3, all points are within the shaded blue region, so the measurements are consistent with the resistance and capacitance within the tolerances given.
+
+- Figure 4 required the phase to be recorded manually. This likely made the measurements far less accurate and more prone to human error. Indeed, the author particularly regrets their lack of discipline in measuring the last few data points.
+
 """
 
 # ╔═╡ 8f4aa2aa-e860-4857-8f32-7b79fabf82c1
@@ -130,7 +178,8 @@ md"""
 
 # ╔═╡ b75150d2-43b9-4d16-a197-d72f5dc1317e
 md"""
-#### Data
+#### Appendix: Data
+
 """
 
 # ╔═╡ 6f395a82-a7c2-4238-82cc-f0d820a7dcbb
@@ -148,7 +197,7 @@ begin
     phase    = -0.36(delay .* freq)
 	
 	DataFrame(
-        vᵢₙ=vᵢₙ_rms * u"mV", vₒᵤₜ=vₒᵤₜ_rms * u"mV", 
+        Vᵢₙ=vᵢₙ_rms * u"mV", Vₒᵤₜ=vₒᵤₜ_rms * u"mV", 
 		Frequency=freq * u"Hz", Delay=delay * u"ms",
 		Gain=gain * u"dB", Phase=phase * u"°"
 	)
@@ -172,7 +221,7 @@ begin
         label="Theoretical Voltage",
         ylabel="Voltage (V)",
         xlabel="Time (s)",
-        title="Fig. 1: Output voltage as a function of time",
+        title="Output voltage as a function of time",
         legend=:right,
         xlims=(-0.02, 0.65),
         linewidth=3,
@@ -197,7 +246,7 @@ begin
         label="Theoretical gain",
         ylabel="Gain (dB)",
         xlabel="Frequency (Hz)",
-        title="Fig. 2: Gain as a function of Frequency",
+        title="Gain as a function of Frequency",
     )
 	scatter!(freq,
 	    gain,
@@ -218,7 +267,7 @@ begin
         label="Theoretical phase",
         ylabel="Phase (°)",
         xlabel="Frequency (Hz)",
-        title="Fig. 3: Phase as a function of Frequency",
+        title="Phase as a function of Frequency",
     )
 	scatter!(freq,
 	    phase,
@@ -238,13 +287,13 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
-CSV = "~0.9.10"
+CSV = "~0.9.11"
 DataFrames = "~1.2.2"
-DifferentialEquations = "~6.19.0"
+DifferentialEquations = "~6.20.0"
 Measurements = "~2.6.0"
-Plots = "~1.23.5"
+Plots = "~1.23.6"
 PlutoUI = "~0.7.19"
-Unitful = "~1.9.1"
+Unitful = "~1.9.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -268,14 +317,19 @@ git-tree-sha1 = "84918055d15b3114ede17ac6a7182f68870c16f7"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
 version = "3.3.1"
 
+[[ArgCheck]]
+git-tree-sha1 = "dedbbb2ddb876f899585c4ec4433265e3017215a"
+uuid = "dce04be8-c92d-5529-be00-80e4d2c0e197"
+version = "2.1.0"
+
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 
 [[ArnoldiMethod]]
 deps = ["LinearAlgebra", "Random", "StaticArrays"]
-git-tree-sha1 = "f87e559f87a45bece9c9ed97458d3afe98b1ebb9"
+git-tree-sha1 = "62e51b39331de8911e4a7ff6f5aaf38a5f4cc0ae"
 uuid = "ec485272-7323-5ecc-a04f-4719b315124d"
-version = "0.1.0"
+version = "0.2.0"
 
 [[ArrayInterface]]
 deps = ["Compat", "IfElse", "LinearAlgebra", "Requires", "SparseArrays", "Static"]
@@ -285,12 +339,17 @@ version = "3.1.40"
 
 [[ArrayLayouts]]
 deps = ["FillArrays", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "7a92ea1dd16472d18ca1ffcbb7b3cc67d7e78a3f"
+git-tree-sha1 = "e1ba79094cae97b688fb42d31cbbfd63a69706e4"
 uuid = "4c555306-a7a7-4459-81d9-ec55ddd5c99a"
-version = "0.7.7"
+version = "0.7.8"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+
+[[AutoHashEquals]]
+git-tree-sha1 = "45bb6705d93be619b81451bb2006b7ee5d4e4453"
+uuid = "15f4f7f2-30c1-5605-9d31-71845cf9641f"
+version = "0.2.0"
 
 [[BandedMatrices]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "Random", "SparseArrays"]
@@ -298,8 +357,19 @@ git-tree-sha1 = "ce68f8c2162062733f9b4c9e3700d5efc4a8ec47"
 uuid = "aae01518-5342-5314-be14-df237901396f"
 version = "0.16.11"
 
+[[BangBang]]
+deps = ["Compat", "ConstructionBase", "Future", "InitialValues", "LinearAlgebra", "Requires", "Setfield", "Tables", "ZygoteRules"]
+git-tree-sha1 = "0ad226aa72d8671f20d0316e03028f0ba1624307"
+uuid = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
+version = "0.3.32"
+
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[Baselet]]
+git-tree-sha1 = "aebf55e6d7795e02ca500a689d326ac979aaf89e"
+uuid = "9718e550-a3fa-408a-8086-8db961cd8217"
+version = "0.1.1"
 
 [[Bijections]]
 git-tree-sha1 = "705e7822597b432ebe152baa844b49f8026df090"
@@ -343,9 +413,9 @@ version = "3.3.0"
 
 [[CSV]]
 deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings"]
-git-tree-sha1 = "74147e877531d7c172f70b492995bc2b5ca3a843"
+git-tree-sha1 = "49f14b6c56a2da47608fe30aed711b5882264d7a"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.9.10"
+version = "0.9.11"
 
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -438,6 +508,11 @@ git-tree-sha1 = "d5b014b216dc891e81fea299638e4c10c657b582"
 uuid = "b152e2b5-7a66-4b01-a709-34e65c35f657"
 version = "0.1.2"
 
+[[CompositionsBase]]
+git-tree-sha1 = "455419f7e328a1a2493cabc6428d79e951349769"
+uuid = "a33af91c-f02d-484b-be07-31d278c5ca2b"
+version = "0.1.1"
+
 [[ConstructionBase]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "f74e9d5388b8620b4cee35d4c5a618dd4dc547f4"
@@ -487,6 +562,11 @@ version = "1.0.0"
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
+[[DefineSingletons]]
+git-tree-sha1 = "77b4ca280084423b728662fe040e5ff8819347c5"
+uuid = "244e2a9f-e319-4986-a169-4d1fe445cd52"
+version = "0.1.1"
+
 [[DelayDiffEq]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "LinearAlgebra", "Logging", "NonlinearSolve", "OrdinaryDiffEq", "Printf", "RecursiveArrayTools", "Reexport", "UnPack"]
 git-tree-sha1 = "6eba402e968317b834c28cd47499dd1b572dd093"
@@ -499,9 +579,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DensityInterface]]
 deps = ["InverseFunctions", "Test"]
-git-tree-sha1 = "794daf62dce7df839b8ed446fc59c68db4b5182f"
+git-tree-sha1 = "80c3e8639e3353e5d2912fb3a1916b8455e2494b"
 uuid = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
-version = "0.3.3"
+version = "0.4.0"
 
 [[DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "DEDataArrays", "DataStructures", "Distributions", "DocStringExtensions", "FastBroadcast", "ForwardDiff", "FunctionWrappers", "IterativeSolvers", "LabelledArrays", "LinearAlgebra", "Logging", "MuladdMacro", "NonlinearSolve", "Parameters", "PreallocationTools", "Printf", "RecursiveArrayTools", "RecursiveFactorization", "Reexport", "Requires", "SciMLBase", "Setfield", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "ZygoteRules"]
@@ -522,10 +602,10 @@ uuid = "5a0ffddc-d203-54b0-88ba-2c03c0fc2e67"
 version = "2.4.0"
 
 [[DiffEqJump]]
-deps = ["ArrayInterface", "Compat", "DataStructures", "DiffEqBase", "FunctionWrappers", "LightGraphs", "LinearAlgebra", "PoissonRandom", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "StaticArrays", "TreeViews", "UnPack"]
-git-tree-sha1 = "9f47b8ae1c6f2b172579ac50397f8314b460fcd9"
+deps = ["ArrayInterface", "Compat", "DataStructures", "DiffEqBase", "FunctionWrappers", "Graphs", "LinearAlgebra", "PoissonRandom", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "StaticArrays", "TreeViews", "UnPack"]
+git-tree-sha1 = "0aa2d003ec9efe2a93f93ae722de05a870ffc0b2"
 uuid = "c894b116-72e5-5b58-be3c-e6d8d4ac2b12"
-version = "7.3.1"
+version = "8.0.0"
 
 [[DiffEqNoiseProcess]]
 deps = ["DiffEqBase", "Distributions", "LinearAlgebra", "Optim", "PoissonRandom", "QuadGK", "Random", "Random123", "RandomNumbers", "RecipesBase", "RecursiveArrayTools", "Requires", "ResettableStacks", "SciMLBase", "StaticArrays", "Statistics"]
@@ -553,9 +633,9 @@ version = "1.4.0"
 
 [[DifferentialEquations]]
 deps = ["BoundaryValueDiffEq", "DelayDiffEq", "DiffEqBase", "DiffEqCallbacks", "DiffEqFinancial", "DiffEqJump", "DiffEqNoiseProcess", "DiffEqPhysics", "DimensionalPlotRecipes", "LinearAlgebra", "MultiScaleArrays", "OrdinaryDiffEq", "ParameterizedFunctions", "Random", "RecursiveArrayTools", "Reexport", "SteadyStateDiffEq", "StochasticDiffEq", "Sundials"]
-git-tree-sha1 = "ff7138ae7fa684eb91753e772d4e4c2db83503ad"
+git-tree-sha1 = "91df208ee040be7960c408d4681bf91974bcb4f4"
 uuid = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-version = "6.19.0"
+version = "6.20.0"
 
 [[DimensionalPlotRecipes]]
 deps = ["LinearAlgebra", "RecipesBase"]
@@ -575,9 +655,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "2ea02796c118368c3eda414fc11f5a39259fa3d9"
+git-tree-sha1 = "dc6f530de935bb3c3cd73e99db5b4698e58b2fcf"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.27"
+version = "0.25.31"
 
 [[DocStringExtensions]]
 deps = ["LibGit2"]
@@ -832,6 +912,11 @@ git-tree-sha1 = "098e4d2c533924c921f9f9847274f2ad89e018b8"
 uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"
 version = "0.5.0"
 
+[[InitialValues]]
+git-tree-sha1 = "7f6a4508b4a6f46db5ccd9799a3fc71ef5cad6e6"
+uuid = "22cec73e-a1b8-11e9-2c92-598750a2cf9c"
+version = "0.2.11"
+
 [[InlineStrings]]
 deps = ["Parsers"]
 git-tree-sha1 = "19cb49649f8c41de7fea32d089d37de917b553da"
@@ -1006,12 +1091,6 @@ git-tree-sha1 = "7f3efec06033682db852f8b3bc3c1d2b0a0ab066"
 uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
 version = "2.36.0+0"
 
-[[LightGraphs]]
-deps = ["ArnoldiMethod", "DataStructures", "Distributed", "Inflate", "LinearAlgebra", "Random", "SharedArrays", "SimpleTraits", "SparseArrays", "Statistics"]
-git-tree-sha1 = "432428df5f360964040ed60418dd5601ecd240b6"
-uuid = "093fc24a-ae57-5d10-9952-331d41423f4d"
-version = "1.3.5"
-
 [[LineSearches]]
 deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "Printf"]
 git-tree-sha1 = "f27132e551e959b3667d8c93eae90973225032dd"
@@ -1033,9 +1112,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LoopVectorization]]
 deps = ["ArrayInterface", "CPUSummary", "CloseOpenIntervals", "DocStringExtensions", "HostCPUFeatures", "IfElse", "LayoutPointers", "LinearAlgebra", "OffsetArrays", "PolyesterWeave", "Requires", "SIMDDualNumbers", "SLEEFPirates", "Static", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "2f8621145e87ce637a2f7ac701353c74d974455e"
+git-tree-sha1 = "9d8ce46c7727debdfd65be244f22257abf7d8739"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.96"
+version = "0.12.98"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1073,6 +1152,18 @@ git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
 uuid = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 version = "0.3.1"
 
+[[Metatheory]]
+deps = ["AutoHashEquals", "DataStructures", "Dates", "DocStringExtensions", "Parameters", "Reexport", "TermInterface", "ThreadsX", "TimerOutputs"]
+git-tree-sha1 = "0d3b2feb3168e4deb78361d3b5bb5c2e51ea5271"
+uuid = "e9d8d322-4543-424a-9be4-0cc815abe26c"
+version = "1.3.2"
+
+[[MicroCollections]]
+deps = ["BangBang", "Setfield"]
+git-tree-sha1 = "4f65bdbbe93475f6ff9ea6969b21532f88d359be"
+uuid = "128add7d-3638-4c79-886c-908ea0c25c34"
+version = "0.1.1"
+
 [[Missings]]
 deps = ["DataAPI"]
 git-tree-sha1 = "bf210ce90b6c9eed32d25dbcae1ebc565df2687f"
@@ -1083,10 +1174,10 @@ version = "1.0.2"
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[ModelingToolkit]]
-deps = ["AbstractTrees", "ArrayInterface", "ConstructionBase", "DataStructures", "DiffEqBase", "DiffEqCallbacks", "DiffEqJump", "DiffRules", "Distributed", "Distributions", "DocStringExtensions", "DomainSets", "IfElse", "InteractiveUtils", "JuliaFormatter", "LabelledArrays", "Latexify", "Libdl", "LightGraphs", "LinearAlgebra", "MacroTools", "NaNMath", "NonlinearSolve", "RecursiveArrayTools", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SafeTestsets", "SciMLBase", "Serialization", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "Symbolics", "UnPack", "Unitful"]
-git-tree-sha1 = "fb0a1466c17e05e05d6b190c7ad15bd920198645"
+deps = ["AbstractTrees", "ArrayInterface", "ConstructionBase", "DataStructures", "DiffEqBase", "DiffEqCallbacks", "DiffEqJump", "DiffRules", "Distributed", "Distributions", "DocStringExtensions", "DomainSets", "Graphs", "IfElse", "InteractiveUtils", "JuliaFormatter", "LabelledArrays", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "NaNMath", "NonlinearSolve", "RecursiveArrayTools", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SafeTestsets", "SciMLBase", "Serialization", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "Symbolics", "UnPack", "Unitful"]
+git-tree-sha1 = "f2cb110abd4874d3a78c4ce6dc54aca712f36dac"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "6.7.1"
+version = "7.1.1"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
@@ -1203,15 +1294,15 @@ version = "8.44.0+0"
 
 [[PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "c8b8775b2f242c80ea85c83714c64ecfa3c53355"
+git-tree-sha1 = "86a37fba91f9fb5bbc5207e9458a5b831dfebb6b"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.3"
+version = "0.11.4"
 
 [[ParameterizedFunctions]]
 deps = ["DataStructures", "DiffEqBase", "DocStringExtensions", "Latexify", "LinearAlgebra", "ModelingToolkit", "Reexport", "SciMLBase"]
-git-tree-sha1 = "c2d9813bdcf47302a742a1f5956d7de274acec12"
+git-tree-sha1 = "3baa1ad75b77f406988be4dc0364e01cf16127e7"
 uuid = "65888b18-ceab-5e60-b2b9-181511a3b968"
-version = "5.12.1"
+version = "5.12.2"
 
 [[Parameters]]
 deps = ["OrderedCollections", "UnPack"]
@@ -1249,9 +1340,9 @@ version = "1.0.15"
 
 [[Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun"]
-git-tree-sha1 = "7dc03c2b145168f5854085a16d054429d612b637"
+git-tree-sha1 = "0d185e8c33401084cab546a756b387b15f76720c"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.23.5"
+version = "1.23.6"
 
 [[PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
@@ -1371,6 +1462,12 @@ git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
 
+[[Referenceables]]
+deps = ["Adapt"]
+git-tree-sha1 = "e681d3bfa49cd46c3c161505caddf20f0e62aaa9"
+uuid = "42d2dcc6-99eb-4e98-b66c-637b7d73030e"
+version = "0.1.2"
+
 [[Requires]]
 deps = ["UUIDs"]
 git-tree-sha1 = "4036a3bd08ac7e968e27c203d45f5fff15020621"
@@ -1485,15 +1582,21 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[SparseDiffTools]]
 deps = ["Adapt", "ArrayInterface", "Compat", "DataStructures", "FiniteDiff", "ForwardDiff", "Graphs", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays", "VertexSafeGraphs"]
-git-tree-sha1 = "7746baad9734786113d09a1b185b005ccfad3f9b"
+git-tree-sha1 = "f87076b43379cb0bd9f421cfe7c649fb510d8e4e"
 uuid = "47a9eef4-7e08-11e9-0b38-333d64bd3804"
-version = "1.18.0"
+version = "1.18.1"
 
 [[SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
 git-tree-sha1 = "f0bccf98e16759818ffc5d97ac3ebf87eb950150"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "1.8.1"
+
+[[SplittablesBase]]
+deps = ["Setfield", "Test"]
+git-tree-sha1 = "39c9f91521de844bad65049efd4f9223e7ed43f9"
+uuid = "171d559e-b47b-412a-8079-5efa626c420e"
+version = "0.1.14"
 
 [[Static]]
 deps = ["IfElse"]
@@ -1523,10 +1626,10 @@ uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.33.12"
 
 [[StatsFuns]]
-deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "95072ef1a22b057b1e80f73c2a89ad238ae4cfff"
+deps = ["ChainRulesCore", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
+git-tree-sha1 = "385ab64e64e79f0cd7cfcf897169b91ebbb2d6c8"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "0.9.12"
+version = "0.9.13"
 
 [[SteadyStateDiffEq]]
 deps = ["DiffEqBase", "DiffEqCallbacks", "LinearAlgebra", "NLsolve", "Reexport", "SciMLBase"]
@@ -1536,9 +1639,9 @@ version = "1.6.6"
 
 [[StochasticDiffEq]]
 deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqJump", "DiffEqNoiseProcess", "DocStringExtensions", "FillArrays", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "OrdinaryDiffEq", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
-git-tree-sha1 = "45b59a5bd9665fe678c0372d7026321df28769d8"
+git-tree-sha1 = "d6756d0c66aecd5d57ad9d305d7c2526fb5922d9"
 uuid = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
-version = "6.40.0"
+version = "6.41.0"
 
 [[StrideArraysCore]]
 deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "ManualMemory", "Requires", "SIMDTypes", "Static", "ThreadingUtilities"]
@@ -1573,16 +1676,16 @@ uuid = "fb77eaff-e24c-56d4-86b1-d163f2edb164"
 version = "5.2.0+1"
 
 [[SymbolicUtils]]
-deps = ["AbstractTrees", "Bijections", "ChainRulesCore", "Combinatorics", "ConstructionBase", "DataStructures", "DocStringExtensions", "DynamicPolynomials", "IfElse", "LabelledArrays", "LinearAlgebra", "MultivariatePolynomials", "NaNMath", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "TermInterface", "TimerOutputs"]
-git-tree-sha1 = "3bbb35b0316ddae1234199ae9393d9a7356abb57"
+deps = ["AbstractTrees", "Bijections", "ChainRulesCore", "Combinatorics", "ConstructionBase", "DataStructures", "DocStringExtensions", "DynamicPolynomials", "IfElse", "LabelledArrays", "LinearAlgebra", "Metatheory", "MultivariatePolynomials", "NaNMath", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "TermInterface", "TimerOutputs"]
+git-tree-sha1 = "5255e65d129c8edbde92fd2ede515e61098f93df"
 uuid = "d1185830-fcd6-423d-90d6-eec64667417b"
-version = "0.17.0"
+version = "0.18.1"
 
 [[Symbolics]]
-deps = ["ConstructionBase", "DiffRules", "Distributions", "DocStringExtensions", "DomainSets", "IfElse", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "NaNMath", "RecipesBase", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "TreeViews"]
-git-tree-sha1 = "f7111115caa28991f3f019c572866af8abdbfae8"
+deps = ["ConstructionBase", "DataStructures", "DiffRules", "Distributions", "DocStringExtensions", "DomainSets", "IfElse", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "Metatheory", "NaNMath", "RecipesBase", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "TermInterface", "TreeViews"]
+git-tree-sha1 = "56272fc85e8d99332149fece99284ee31a9fa101"
 uuid = "0c5d862f-8b57-4792-8d23-62f2024744c7"
-version = "3.5.1"
+version = "4.1.0"
 
 [[TOML]]
 deps = ["Dates"]
@@ -1605,9 +1708,9 @@ deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 
 [[TermInterface]]
-git-tree-sha1 = "02a620218eaaa1c1914d228d0e75da122224a502"
+git-tree-sha1 = "7aa601f12708243987b88d1b453541a75e3d8c7a"
 uuid = "8ea1fca8-c5ef-4a55-8b96-4e9afe9c9a3c"
-version = "0.1.8"
+version = "0.2.3"
 
 [[Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
@@ -1618,6 +1721,12 @@ deps = ["ManualMemory"]
 git-tree-sha1 = "03013c6ae7f1824131b2ae2fc1d49793b51e8394"
 uuid = "8290d209-cae3-49c0-8002-c8c24d57dab5"
 version = "0.4.6"
+
+[[ThreadsX]]
+deps = ["ArgCheck", "BangBang", "ConstructionBase", "InitialValues", "MicroCollections", "Referenceables", "Setfield", "SplittablesBase", "Transducers"]
+git-tree-sha1 = "abcff3ac31c7894550566be533b512f8b059104f"
+uuid = "ac1d9e8a-700a-412c-b207-f0111f4b6c0d"
+version = "0.1.8"
 
 [[TimerOutputs]]
 deps = ["ExprTools", "Printf"]
@@ -1635,6 +1744,12 @@ deps = ["Random", "Test"]
 git-tree-sha1 = "216b95ea110b5972db65aa90f88d8d89dcb8851c"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.6"
+
+[[Transducers]]
+deps = ["Adapt", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "Requires", "Setfield", "SplittablesBase", "Tables"]
+git-tree-sha1 = "bccb153150744d476a6a8d4facf5299325d5a442"
+uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
+version = "0.4.67"
 
 [[TreeViews]]
 deps = ["Test"]
@@ -1673,9 +1788,9 @@ version = "0.4.1"
 
 [[Unitful]]
 deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "880f77d2cd4c6948e6bd55425b7b52f34dcd7f4b"
+git-tree-sha1 = "0992ed0c3ef66b0390e5752fe60054e5ff93b908"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.9.1"
+version = "1.9.2"
 
 [[VectorizationBase]]
 deps = ["ArrayInterface", "CPUSummary", "HostCPUFeatures", "Hwloc", "IfElse", "LayoutPointers", "Libdl", "LinearAlgebra", "SIMDTypes", "Static"]
@@ -1913,7 +2028,7 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╠═e30aad7a-1a47-49d9-9142-441290446140
+# ╟─e30aad7a-1a47-49d9-9142-441290446140
 # ╟─15b4171f-9a0c-4fd9-94ca-9e28fcffe818
 # ╟─8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
 # ╟─8c328a54-ca37-4db7-852c-4b496b7b3cd9
@@ -1922,9 +2037,12 @@ version = "0.9.1+5"
 # ╠═f6f1ecaf-228d-4ac9-963c-229b14ea8242
 # ╟─1d70a4fa-c5e2-44b1-9d13-1d788709c754
 # ╟─ac0f240a-9a4b-49f5-8912-0073e128ab83
+# ╟─9c561430-28e0-408e-9665-0c904c2ba893
 # ╟─9fc1d884-baf9-4510-bc4e-a1178f232bcb
+# ╟─1f759aa4-7e8f-4746-a2f5-20141db658bd
 # ╟─1f9e12f3-f8be-49c4-87d1-fb3ec92769ac
-# ╠═7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
+# ╟─d4b2c2db-5267-4de7-9d0a-3f11872aacd8
+# ╟─7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
 # ╟─8f4aa2aa-e860-4857-8f32-7b79fabf82c1
 # ╟─b75150d2-43b9-4d16-a197-d72f5dc1317e
 # ╟─6f395a82-a7c2-4238-82cc-f0d820a7dcbb
