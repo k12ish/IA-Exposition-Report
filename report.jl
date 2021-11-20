@@ -9,11 +9,25 @@ using Plots, Unitful, Measurements, PlutoUI, DifferentialEquations, CSV, DataFra
 
 # ╔═╡ 15b4171f-9a0c-4fd9-94ca-9e28fcffe818
 md"""
-## Time and frequency domain analysis of an electronic low pass filter
-**Krish Shah, Girton College, Lab Group 37**
+# Time and frequency domain analysis of an electronic low pass filter
+"""
 
+# ╔═╡ ef223005-81dc-4717-9e3f-ef8f06870614
+HTML("""
+<center><h6>Krish Shah <br> Lab Group 37 <br> Girton College</h6></center>
+""")
+
+# ╔═╡ 8d9f40ef-21a4-4a9c-988d-4fb3a936009e
+md"""
 This report details the time and frequency domain analysis of a low pass filter comprised of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
-Theory matched very well experiment.
+"""
+
+# ╔═╡ 35c3fd8a-bb8d-471e-b057-3f02913ca13b
+html"""
+<script>
+let cell = currentScript.closest("pluto-cell");
+cell.style.pageBreakAfter = "always";
+</script>
 """
 
 # ╔═╡ 8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
@@ -143,14 +157,14 @@ md"""
 
 # ╔═╡ 1f759aa4-7e8f-4746-a2f5-20141db658bd
 md"""
-> **Figure 3:** A Bode plot showing gain as a function of frequency.
+> **Figure 3:** A Bode Magnitude plot showing gain as a function of frequency.
 
 ----
 """
 
 # ╔═╡ d4b2c2db-5267-4de7-9d0a-3f11872aacd8
 md"""
-> **Figure 4:** A Bode plot showing phase as a function of frequency.
+> **Figure 4:** A Bode Phase plot showing phase as a function of frequency.
 
 """
 
@@ -2030,6 +2044,9 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╟─e30aad7a-1a47-49d9-9142-441290446140
 # ╟─15b4171f-9a0c-4fd9-94ca-9e28fcffe818
+# ╟─ef223005-81dc-4717-9e3f-ef8f06870614
+# ╟─8d9f40ef-21a4-4a9c-988d-4fb3a936009e
+# ╟─35c3fd8a-bb8d-471e-b057-3f02913ca13b
 # ╟─8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
 # ╟─8c328a54-ca37-4db7-852c-4b496b7b3cd9
 # ╟─8068d016-34ee-4c43-80f5-f7110e65da62
