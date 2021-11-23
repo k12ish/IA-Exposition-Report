@@ -19,22 +19,17 @@ HTML("""
 
 # ╔═╡ 8d9f40ef-21a4-4a9c-988d-4fb3a936009e
 md"""
-This report details the time and frequency domain analysis of a low pass filter comprised of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
-"""
-
-# ╔═╡ 35c3fd8a-bb8d-471e-b057-3f02913ca13b
-html"""
-<script>
-let cell = currentScript.closest("pluto-cell");
-cell.style.pageBreakAfter = "always";
-</script>
+This report details the theoretical and experimental time and frequency domain analysis of a first order Butterworth low pass filter.
+Using Ohms and Kirchoffs Laws, we derive equations for the gain and phase of the filter, as well as the charging response in DC current.
+Experimental data must be scrutinized due to the large uncertainties of electrical components.
+We use sophisticated error propogation tools to show that almost all experimental data lies well within the tolerances of the components used.
 """
 
 # ╔═╡ 8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
 md"""
-#### Introduction and Objectives
+### Introduction and Objectives
 
-Low pass filters act to block the high frequency _component_ of an arbitary signal.
+Low pass filters act to block the high frequency component of an arbitary signal.
 This property makes them very useful in acoustics and electronics, where they have applications ranging from subwoofer electronics to telecommunications equipment.
 
 This report has the following aims and objectives:
@@ -42,11 +37,8 @@ This report has the following aims and objectives:
 - To compare the measurements obtained from the picoscope readings with expected theoretical calculations of the nominal value of the RC time constant of the components.
 - To understand the impact of the resistor tolerance (5%) and the capacitator tolerance (20%) on the value of the RC time constant and the expected performance of the components.
 - To investigate the attenuation vs frequency behaviour of a low pass filter in terms of dB/decade.
-"""
 
-# ╔═╡ 8c328a54-ca37-4db7-852c-4b496b7b3cd9
-md"""
-#### Experimental Method
+### Experimental Method
 
 Two experiments were completed for this report, following the guidance in the lab handouts provided.
 Both experiments involved the analysis of a $100\,\mathrm k\Omega$ resistor in series with a $1 \mu \mathrm F$ capacitor.
@@ -69,11 +61,7 @@ $$v_{\text{in}}(t)= \left\{
 IEP Exercise C involved the frequency domain analysis of the circuit.
 In this experiment the frequency of the input voltage was varied and the output voltage was measured.
 
-"""
-
-# ╔═╡ 8068d016-34ee-4c43-80f5-f7110e65da62
-md"""
-#### Theory
+### Theory
 
 
 First, we consider the time domain analysis.
@@ -117,11 +105,7 @@ At very low frequencies, this equation is approximated by a straight line of zer
 For large frequencies, $$\log \left(1+(\omega R C)^{2}\right)
 \approx 2 \log \left(\omega R C\right)$$, so the attenuation is approximated by a straight line of −20 dB per decade slope.
 
-"""
-
-# ╔═╡ 851bdb4f-eedd-4080-806b-9a0528841e4b
-md"""
-#### Presentation of results
+### Results
 
 Uncertainties are a decisive factor in our analysis.
 The resistor and capacitor have tolerances of 5% and 20% respectively, making the value of $$RC$$ differ by up to 25%.
@@ -137,7 +121,6 @@ Entering values for $$R$$ and $$C$$ into the program, we can see that the uncert
 begin
 	R    = 100e3 ± 1000    # Resistance values from lab handout
 	C    = 1e-6  ± 2e-7    # Capacitance values from lab handout
-
 	(1/(R * C))u"s^-1"     # Display the value of 1/RC (with units)
 end
 
@@ -150,7 +133,7 @@ We represent the area of uncertainty on each graph below with a blue shaded regi
 
 # ╔═╡ 9c561430-28e0-408e-9665-0c904c2ba893
 md"""
-> **Figure 2:** A graph showing the output voltage as a function of time. The value of ``V_{max}`` used to create the theoretical voltage curve was 5.102 ± 0.0002 V, obtained from the picoscope measuring software. The measurement data was shifted by 0.018s in the x-axis to zero the picoscope readings.
+> **Figure 2:** A graph showing the output voltage as a function of time. The theoretical voltage curve used ``V_{max} = 5.102 ± 0.0002 \mathrm V``, obtained from the picoscope measuring software. The measured voltage was shifted by ``t_d = 0.018 \mathrm s`` in the time domain to zero the picoscope readings.
 
 ----
 """
@@ -170,7 +153,7 @@ md"""
 
 # ╔═╡ 7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
 md"""
-#### Discussion
+### Discussion
 
 Time domain analysis agrees almost perfectly with theoretical data.
 - In figure 2, all points are within the shaded blue region, which shows that the measurement is consistent with the resistance and capacitance within the tolerances given.
@@ -184,15 +167,26 @@ Frequency domain analysis agrees strongly with theoretical data, but hints stron
 
 # ╔═╡ 8f4aa2aa-e860-4857-8f32-7b79fabf82c1
 md"""
-#### Conclusions 
+### Conclusions 
 
-> 1. *these should summarise concisely the basic achievements of the investigation in the light of the aims and objectives*
-> 1. *it is often a good idea to number the conclusions.*
+1. Time and frequency domain analysis was performed on a low pass filter with a ``1\mu \mathrm F`` capacitor and a ``1\mathrm k \Omega`` resistor to obtain a value for the RC time constant and plot Bode plots for gain and phase as functions of frequency.
+2. Time domain showed that the RC time constant measured was very accurate, virtually identical to the expected value
+3. The measured data for the phase as a function of frequency was less accurate, almost certainly due to the manual process in which the phase was determined.
+4. The Julia programming language presents a unique set of tools that could be useful in the Engineering Department
+
+"""
+
+# ╔═╡ 35c3fd8a-bb8d-471e-b057-3f02913ca13b
+html"""
+<script>
+let cell = currentScript.closest("pluto-cell");
+cell.style.pageBreakAfter = "always";
+</script>
 """
 
 # ╔═╡ b75150d2-43b9-4d16-a197-d72f5dc1317e
 md"""
-#### Appendix: Data
+### Appendix: Data
 
 """
 
@@ -1059,9 +1053,9 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "761a393aeccd6aa92ec3515e428c26bf99575b3b"
+git-tree-sha1 = "0b4a5d71f3e5200a7dff793393e09dfc2d874290"
 uuid = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
-version = "3.2.2+0"
+version = "3.2.2+1"
 
 [[Libgcrypt_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll", "Pkg"]
@@ -2046,11 +2040,7 @@ version = "0.9.1+5"
 # ╟─15b4171f-9a0c-4fd9-94ca-9e28fcffe818
 # ╟─ef223005-81dc-4717-9e3f-ef8f06870614
 # ╟─8d9f40ef-21a4-4a9c-988d-4fb3a936009e
-# ╟─35c3fd8a-bb8d-471e-b057-3f02913ca13b
 # ╟─8652ef03-7cb3-4b34-9ff4-7ba3cc62188e
-# ╟─8c328a54-ca37-4db7-852c-4b496b7b3cd9
-# ╟─8068d016-34ee-4c43-80f5-f7110e65da62
-# ╟─851bdb4f-eedd-4080-806b-9a0528841e4b
 # ╠═f6f1ecaf-228d-4ac9-963c-229b14ea8242
 # ╟─1d70a4fa-c5e2-44b1-9d13-1d788709c754
 # ╟─ac0f240a-9a4b-49f5-8912-0073e128ab83
@@ -2061,6 +2051,7 @@ version = "0.9.1+5"
 # ╟─d4b2c2db-5267-4de7-9d0a-3f11872aacd8
 # ╟─7a0b8b81-a8f6-48f1-9ed1-7d7b8ae73778
 # ╟─8f4aa2aa-e860-4857-8f32-7b79fabf82c1
+# ╟─35c3fd8a-bb8d-471e-b057-3f02913ca13b
 # ╟─b75150d2-43b9-4d16-a197-d72f5dc1317e
 # ╟─6f395a82-a7c2-4238-82cc-f0d820a7dcbb
 # ╟─00000000-0000-0000-0000-000000000001
